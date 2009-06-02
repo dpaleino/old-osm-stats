@@ -1,0 +1,2 @@
+# mm  hh  dom mon dow  command
+  13  04  15  *   *    /home/osmteam/scripts/import_planet.sh
