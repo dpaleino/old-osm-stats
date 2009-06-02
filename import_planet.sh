@@ -6,10 +6,9 @@ output="italy_$today.osm"
 prefix="italy_$today"
 
 wget $url -O $output.bz2
-bunzip2 $output.bz2
+bunzip2 -k $output.bz2
 
 # Save a copy of the .bz2
-bzip2 $output
 [ -d archive ] || mkdir archive/
 mv $output.bz2 archive/
 
