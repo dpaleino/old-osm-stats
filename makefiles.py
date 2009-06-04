@@ -31,6 +31,14 @@ def percent(a, b):
 	"""Returns percentage of a over b."""
 	return float(a) / float(b)
 
+def percent_cmp(a, b):
+	if a['percent'] < b['percent']:
+		return 1
+	elif a['percent'] == b['percent']:
+		return 0
+	else:
+		return -1
+
 def query(q):
 	"""Executes the passed query, and returns a parsed tuple."""
 	from subprocess import PIPE, Popen
@@ -87,15 +95,15 @@ def comuni_coperti_per_regione():
 	data = {"old": query(q % previous), "new": query(q % today)}
 	print "fatto."
 
-	dict = {"old":{}, "new":{}}
+	lists = {"old":[], "new":[]}
 	#for region, total, done in data.values():
 	for d in data:
 		for tuple in data[d]:
 			region, total, done = tuple
-			dict[d][region] = {"total": int(total), "done": int(done), "percent": percent(done, total)}
+			lists[d].append({"region": region, "total": int(total), "done": int(done), "percent": percent(done, total)})
 
-	# sort per completion percentage
-	max_completion = 0.0
+	tmplist = lists["new"]
+	lists["new"] = sorted(tmplist, cmp=percent_cmp)
 
 	html = """<table class="sortable" rules="none" frame="void" cellspacing="0" border="0">
 	<tr>
@@ -109,11 +117,12 @@ def comuni_coperti_per_regione():
 		<td align="center"><strong>%s</strong></td>
 		<td align="center"><strong>%s</strong></td>
 		<td align="center"><strong>%s</strong></td>
-	</tr>""" % (previous, today, previous, today)
+	</tr>
+""" % (previous, today, previous, today)
 
 	total = 0
 	done = {"old":0, "new":0}
-	for region in dict["new"]:
+	for l in lists["new"]:
 		html += """	<tr>
 		<td align="left"><strong>%s</strong></td>
 		<td align="right">%d</td>
@@ -122,13 +131,13 @@ def comuni_coperti_per_regione():
 		<td align="right">%.2f%%</td>
 		<td bgcolor="%s" align="right">%.2f%%</td>
 	</tr>
-""" % (region, dict["new"][region]["total"], dict["old"][region]["done"], dict["new"][region]["done"], dict["old"][region]["percent"]*100, color(dict["new"][region]["percent"]), dict["new"][region]["percent"]*100)
+""" % (l["region"], l["total"], lists["old"][lists["new"].index(l)]["done"], l["done"], lists["old"][lists["new"].index(l)]["percent"]*100, color(lists["new"][lists["new"].index(l)]["percent"]), l["percent"]*100)
 
-		print repr(dict)
+		print repr(lists)
 		#print repr(total)
-		total += int(dict["new"][region]["total"])
-		done["old"] += int(dict["old"][region]["done"])
-		done["new"] += int(dict["new"][region]["done"])
+		total += int(l["total"])
+		done["old"] += int(lists["old"][lists["new"].index(l)]["done"])
+		done["new"] += int(l["done"])
 
 	html += """	<tr>
 		<td align="left"><strong>Totale</strong></td>
