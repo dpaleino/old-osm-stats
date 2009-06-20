@@ -6,14 +6,13 @@ output="italy_$today.osm"
 prefix="italy_$today"
 
 wget $url -O $output.bz2
-bunzip2 -k $output.bz2
 
 # Save a copy of the .bz2
 [ -d archive ] || mkdir archive/
 mv $output.bz2 archive/
 
 # Import data into PostGIS
-osm2pgsql -l -p $prefix $output
+osm2pgsql -U mapnik -l -p $prefix archive/$output.bz2
 
 # Create the statistics table
 echo "CREATE TABLE osm_stat_$today AS \
@@ -25,5 +24,3 @@ WHERE l.highway <> '' AND l.way &&  transform(c.geom, 4326) AND intersects(l.way
 if [ "$?" -eq 2 ]; then
 	mail --subject "Statistics table creation failed!" d.paleino@gmail.com
 fi
-# Remove uncompressed file -- we have the .bz2 one in archive/.
-rm $output
