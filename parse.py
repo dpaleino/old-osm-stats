@@ -3,8 +3,10 @@
 
 import libxml2
 import sys
+
 from genshi.template import MarkupTemplate
 from collections import defaultdict
+from json import JsonReader, JsonWriter, ReadException
 
 nodes = defaultdict(int)
 ways = defaultdict(int)

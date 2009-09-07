@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-previous = ""
-today = ""
+from json import JsonReader, JsonWriter
+
+saved = {}
 
 def color(p):
 	"""
@@ -38,6 +39,14 @@ def percent_cmp(a, b):
 		return 0
 	else:
 		return -1
+
+def plot(xcoords, ycoords, file, style='b-'):
+	import matplotlib.pyplot as plt
+	import matplotlib.dates as dts
+	from datetime import datetime
+
+	plt.plot_date(map(lambda x: dts.date2num(datetime.strptime(x, "%Y%m%d")), xcoords), ycoords, style)
+	plt.savefig(file)
 
 def query(q):
 	"""Executes the passed query, and returns a parsed tuple."""
@@ -80,6 +89,8 @@ def parse(f):
 	return list
 
 def comuni_coperti_per_regione():
+	global saved
+
 	q = """SELECT p.nome_reg, count(p.cod_pro), count(p.highw)
 	FROM (
 		SELECT r.nome_reg, c.cod_pro, c.pro_com, c.geom, c.nome_com, c.pop2001, min(s.cod_reg) AS highw
@@ -92,7 +103,7 @@ def comuni_coperti_per_regione():
 	GROUP BY p.nome_reg;"""
 
 	print "Esecuzione query comuni coperti per regione... ",
-	data = {"old": query(q % previous), "new": query(q % today)}
+	data = {"old": query(q % saved["previous"]), "new": query(q % saved["current"])}
 	print "fatto."
 
 	lists = {"old":[], "new":[]}
@@ -118,7 +129,7 @@ def comuni_coperti_per_regione():
 		<td align="center"><strong>%s</strong></td>
 		<td align="center"><strong>%s</strong></td>
 	</tr>
-""" % (previous, today, previous, today)
+""" % (saved["previous"], saved["current"], saved["previous"], saved["current"])
 
 	total = 0
 	done = {"old":0, "new":0}
@@ -149,18 +160,35 @@ def comuni_coperti_per_regione():
 	</tr>
 """ % (total, done["old"], done["new"], percent(done["old"], total) * 100.0, percent(done["new"], total) * 100.0)
 	html += "</table>"
+
+	# save percentages
+	if saved.has_key("comuni"):
+		saved["comuni"].append((saved["current"], percent(done["new"], total) * 100.0))
+	else:
+		saved["comuni"] = [(saved["current"], percent(done["new"], total) * 100.0),]
+
+	dates = []
+	percs = []
+	for date, perc in saved["comuni"]:
+		dates.append(date)
+		percs.append(perc)
+	plot(dates, percs, "comuni-coperti.png")
 	return html
 		
 def main():
 	from datetime import date
 	import os
 
-	global previous, today
+	global saved
+
 	f = open(os.path.expanduser("~/.osmitstats"), "r")
-	previous = f.readline().strip()
+	j = JsonReader()
+	saved = j.read(f.readline())
+	print repr(saved)
 	f.close()
+	#saved["current"] = str(date.today()).replace('-', '')
 	#today = str(date.today()).replace('-', '')
-	today = "20090531"
+	saved["current"] = "20090531"
 
 	q_regioni = """SELECT c.nome_reg, sum(c.pop2001), sum(length(transform(s.intersection, 3395))) AS highw FROM it_comuni c LEFT JOIN osm_stat_20090531 s ON c.pro_com =s.pro_com GROUP BY c.nome_reg ORDER BY nome_reg;"""
 	
@@ -170,9 +198,12 @@ def main():
 	f.close()
 
 	# The script has finished now, touch our helper file
-	#f = open(os.path.expanduser("~/.osmitstats"), "w")
-	#f.write(today)
-	#f.close()
+	f = open(os.path.expanduser("~/.osmitstats"), "w")
+	j = JsonWriter()
+	#saved["previous"] = saved["current"]
+	saved["current"] = None
+	f.write(j.write(saved))
+	f.close()
 
 if __name__ == '__main__':
 	main()

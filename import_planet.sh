@@ -5,11 +5,11 @@ today=$(date +%Y%m%d)
 output="italy_$today.osm"
 prefix="italy_$today"
 
-[ -d archive ] || mkdir archive/
-wget $url -O archive/$output.bz2
+[ -d ../archive ] || mkdir ../archive/
+wget $url -O ../archive/$output.bz2
 
 # Import data into PostGIS
-osm2pgsql -l -p $prefix archive/$output.bz2
+osm2pgsql -l -p $prefix ../archive/$output.bz2
 
 # Create the statistics table
 echo "CREATE TABLE osm_stat_$today AS \
