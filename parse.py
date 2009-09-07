@@ -77,7 +77,7 @@ def mysort(d):
         ret.append([d[user], user])
     ret.sort()
     ret.reverse()
-    return ret
+    return enumerate(ret)
 
 def main():
     streamFile(sys.argv[1])

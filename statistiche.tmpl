@@ -19,11 +19,11 @@
   <th>Utente</th>
   <th>Totale</th>
 </tr>
-<py:for each="count, user in data">
+<py:for each="count, pair in data">
 <tr>
-    <td>0</td>
-    <td>${user}</td>
-    <td>${count}</td>
+    <td>${count + 1}</td>
+    <td>${pair[1]}</td>
+    <td>${pair[0]}</td>
 </tr>
 </py:for>
 </table>
