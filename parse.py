@@ -6,11 +6,11 @@ import sys
 from genshi.template import MarkupTemplate
 from collections import defaultdict
 
-nodes=defaultdict(int)
-ways=defaultdict(int)
-relations=defaultdict(int)
-tags=defaultdict(lambda : defaultdict(int))
-newtags=defaultdict(list)
+nodes = defaultdict(int)
+ways = defaultdict(int)
+relations = defaultdict(int)
+tags = defaultdict(lambda : defaultdict(int))
+newtags = defaultdict(list)
 
 check = {
           "highway": [ 
@@ -79,7 +79,7 @@ def mysort(d):
     ret.reverse()
     return ret
 
-if __name__ == '__main__':
+def main():
     streamFile(sys.argv[1])
 
     tmpl = MarkupTemplate(open("statistiche.tmpl"))
@@ -95,3 +95,6 @@ if __name__ == '__main__':
                            tags = newtags,
                           )
     print stream.render('xhtml')
+
+if __name__ == '__main__':
+    main()
