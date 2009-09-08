@@ -4,6 +4,7 @@
 import libxml2
 import sys
 import os
+import re
 
 from genshi.template import MarkupTemplate
 from collections import defaultdict
@@ -123,7 +124,14 @@ def save(nodes, ways, relations, tags):
         for pair in tags[tag]:
             tags_count[tag] += pair[0]
 
-    stats[today] = {
+    p = re.compile(".*/italy_(\d{8})\.osm")
+    m = p.match(sys.argv[1])
+    if m:
+        date = m.groups()[0]
+    else:
+        date = today
+
+    stats[date] = {
         "nodes" : nodes_count,
         "ways" : ways_count,
         "relations" : relations_count,
