@@ -24,6 +24,9 @@ check = {
         "bank",
         "post_office",
         ],
+    "addr:housenumber": [
+        "*",
+        ],
     }
 
 nodes = defaultdict(int)
@@ -67,7 +70,11 @@ def checktag(reader, user):
         if reader.Name() == "v" and reader.Value() in check[k]:
             # we're at the correct tag, update the stats
             tagpair = "%s=%s" % (k, reader.Value())
-            tags[tagpair][user] += 1
+        elif reader.Name() == "v" and "*" in check[k]:
+            tagpair = "%s=*" % k
+        else:
+            return
+        tags[tagpair][user] += 1
 
 def streamFile(filename):
     try:
