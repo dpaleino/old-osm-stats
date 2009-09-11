@@ -17,6 +17,8 @@ html_path = "statistiche.html"
 check = {
     "highway": [
         "bus_stop",
+        "path",
+        "footway",
         ],
     "amenity": [
         "drinking_water",
