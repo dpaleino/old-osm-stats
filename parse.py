@@ -12,7 +12,7 @@ from json import JsonReader, JsonWriter, ReadException
 from datetime import date
 
 stats_path = "stats.json"
-html_path = "statistiche.html"
+html_path = "../public_html/statistiche.html"
 
 check = {
     "highway": [
