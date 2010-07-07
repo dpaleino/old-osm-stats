@@ -3,13 +3,28 @@
 stats_path = "stats.json"
 graphs_path = "graphs/"
 
-def plot(xcoords, ycoords, file, style):
+def plot(xcoords, ycoords, file, style, label=""):
     import matplotlib.pyplot as plt
     import matplotlib.dates as dts
     from datetime import datetime
 
-    plt.plot_date(map(lambda x: dts.date2num(datetime.strptime(x, "%Y%m%d")), xcoords), ycoords, style)
-    plt.suptitle(file)
+    years = dts.YearLocator()
+    months = dts.MonthLocator()
+    yearsFmt = dts.DateFormatter("%Y")
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot_date(map(lambda x: dts.date2num(datetime.strptime(x, "%Y%m%d")), xcoords), ycoords, style, label=label)
+    #print repr(xcoords)
+    #ax.plot_date(xcoords, ycoords, style, label=label)
+    ax.xaxis.set_major_locator(years)
+    ax.xaxis.set_major_formatter(yearsFmt)
+    ax.xaxis.set_minor_locator(months)
+
+    fig.autofmt_xdate()
+
+#    ax.set_yscale("log")
+    fig.suptitle(file)
     plt.savefig("%s/%s.png" % (graphs_path, file))
     plt.close()
 
@@ -53,11 +68,11 @@ def main():
 
     for tag in tags:
         newtags[tag] = zip(*sorted(tags[tag]))
-        plot(newtags[tag][0], newtags[tag][1], tag, "bo-")
+        plot(newtags[tag][0], newtags[tag][1], tag, "g^-", label=tag)
 
-    plot(zip(*ynodes)[0], zip(*ynodes)[1], "nodes", "bo-")
-    plot(zip(*yways)[0], zip(*yways)[1], "ways", "r+-")
-    plot(zip(*yrelations)[0], zip(*yrelations)[1], "relations", "g^-")
+    plot(zip(*ynodes)[0], zip(*ynodes)[1], "nodes", "bo-", label="Nodes")
+    plot(zip(*yways)[0], zip(*yways)[1], "ways", "bo-", label="Ways")
+    plot(zip(*yrelations)[0], zip(*yrelations)[1], "relations", "bo-", label="Relations")
 
 if __name__ == '__main__':
 	main()
